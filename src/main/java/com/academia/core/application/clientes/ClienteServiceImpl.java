@@ -1,7 +1,7 @@
 package com.academia.core.application.clientes;
 
 import com.academia.core.domain.clientes.Cliente;
-import com.academia.core.infrastructure.clientes.ClienteJpaRepository;
+import com.academia.core.infrastructure.persistence.ClienteJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
