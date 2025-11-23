@@ -120,19 +120,40 @@ public class ClienteServiceImpl implements ClienteService {
                         }
                     }
 
-                    // Atualiza todos os campos editáveis do perfil:
-                    existente.setNome(clienteAtualizado.getNome());
+                    // Atualiza apenas os campos que foram fornecidos (não nulos)
+                    if (clienteAtualizado.getNome() != null) {
+                        existente.setNome(clienteAtualizado.getNome());
+                    }
                     if (clienteAtualizado.getUsername() != null) {
                         existente.setUsername(clienteAtualizado.getUsername());
                     }
-                    existente.setEmail(clienteAtualizado.getEmail());
-                    existente.setTelefone(clienteAtualizado.getTelefone());
-                    existente.setCpf(clienteAtualizado.getCpf());
-                    existente.setEndereco(clienteAtualizado.getEndereco());
-                    existente.setDataNascimento(clienteAtualizado.getDataNascimento());
-                    existente.setPremium(clienteAtualizado.getPremium());
-                    existente.setPremiumAte(clienteAtualizado.getPremiumAte());
-                    existente.setAvatarDataUrl(clienteAtualizado.getAvatarDataUrl());
+                    if (clienteAtualizado.getEmail() != null) {
+                        existente.setEmail(clienteAtualizado.getEmail());
+                    }
+                    if (clienteAtualizado.getTelefone() != null) {
+                        existente.setTelefone(clienteAtualizado.getTelefone());
+                    }
+                    if (clienteAtualizado.getCpf() != null) {
+                        existente.setCpf(clienteAtualizado.getCpf());
+                    }
+                    if (clienteAtualizado.getEndereco() != null) {
+                        existente.setEndereco(clienteAtualizado.getEndereco());
+                    }
+                    if (clienteAtualizado.getDataNascimento() != null) {
+                        existente.setDataNascimento(clienteAtualizado.getDataNascimento());
+                    }
+                    if (clienteAtualizado.getAvatarDataUrl() != null) {
+                        existente.setAvatarDataUrl(clienteAtualizado.getAvatarDataUrl());
+                    }
+                    // Criptografar senha se foi fornecida
+                    if (clienteAtualizado.getSenha() != null && !clienteAtualizado.getSenha().trim().isEmpty()) {
+                        existente.setSenha(passwordEncoder.encode(clienteAtualizado.getSenha()));
+                    }
+                    // Campos que usuário NÃO pode atualizar via perfil (mantém os existentes):
+                    // - premium (somente admin/sistema pode alterar)
+                    // - premiumAte (somente admin/sistema pode alterar)
+                    // - active (somente admin/sistema pode alterar)
+
                     // updatedAt é @UpdateTimestamp, Hibernate cuida
                     return clienteRepository.save(existente);
                 })

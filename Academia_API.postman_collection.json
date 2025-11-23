@@ -48,7 +48,7 @@
 									"const response = pm.response.json();",
 									"if (response.success && response.data.token) {",
 									"    pm.collectionVariables.set('token', response.data.token);",
-									"    pm.collectionVariables.set('user_id', response.data.id);",
+									"    pm.collectionVariables.set('user_id', response.data.userId);",
 									"    console.log('Token e User ID salvos automaticamente!');",
 									"}"
 								],
@@ -129,7 +129,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"João Silva Santos\",\n  \"username\": \"joaosilva\",\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\",\n  \"telefone\": \"11977777777\",\n  \"cpf\": \"12345678900\",\n  \"endereco\": \"Rua Atualizada, 999\",\n  \"dataNascimento\": \"1990-01-15\"\n}"
+							"raw": "{\n  \"nome\": \"João Silva Santos\",\n  \"telefone\": \"11977777777\",\n  \"cpf\": \"12345678900\",\n  \"endereco\": \"Rua Atualizada, 999\",\n  \"dataNascimento\": \"1990-01-15\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/clientes/{{user_id}}",
