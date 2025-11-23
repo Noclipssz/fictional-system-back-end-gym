@@ -1,5 +1,6 @@
 package com.academia.core.interfaces.clientes;
 
+import com.academia.core.application.auth.AuthService;
 import com.academia.core.application.clientes.ClienteService;
 import com.academia.core.domain.clientes.Cliente;
 import com.academia.core.interfaces.clientes.dto.ClienteResponseDto;
@@ -8,53 +9,16 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final AuthService authService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, AuthService authService) {
         this.clienteService = clienteService;
-    }
-
-    @GetMapping
-    public ResponseEntity<ApiResponse<?>> listar() {
-        List<ClienteResponseDto> lista = clienteService.listarClientes()
-                .stream()
-                .map(ClienteMapper::toResponseDto)
-                .toList();
-
-        return ResponseEntity.ok(
-                ApiResponse.ok(lista, "Lista de clientes")
-        );
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ClienteResponseDto>> buscarPorId(@PathVariable("id") Long id) {
-        return clienteService.buscarPorId(id)
-                .map(cliente -> {
-                    ClienteResponseDto dto = ClienteMapper.toResponseDto(cliente);
-                    return ResponseEntity.ok(
-                            ApiResponse.ok(dto, "Cliente encontrado")
-                    );
-                })
-                .orElseGet(() ->
-                        ResponseEntity.status(404)
-                                .body(ApiResponse.fail("Cliente não encontrado"))
-                );
-    }
-
-    @PostMapping
-    public ResponseEntity<ApiResponse<?>> criar(@Valid @RequestBody Cliente cliente) {
-        Cliente salvo = clienteService.criarCliente(cliente);
-        ClienteResponseDto dto = ClienteMapper.toResponseDto(salvo);
-
-        return ResponseEntity
-                .status(201)
-                .body(ApiResponse.ok(dto, "Cliente criado com sucesso"));
+        this.authService = authService;
     }
 
     @PutMapping("/{id}")
@@ -63,16 +27,35 @@ public class ClienteController {
             @Valid @RequestBody Cliente body
     ) {
         try {
+            // Validar que o usuário está atualizando apenas o próprio perfil
+            Cliente currentUser = authService.getCurrentUser();
+            if (!currentUser.getId().equals(id)) {
+                return ResponseEntity
+                        .status(403)
+                        .body(ApiResponse.fail("Você só pode atualizar seu próprio perfil"));
+            }
+
             Cliente atualizado = clienteService.atualizarCliente(id, body);
             ClienteResponseDto dto = ClienteMapper.toResponseDto(atualizado);
 
             return ResponseEntity.ok(
-                    ApiResponse.ok(dto, "Cliente atualizado com sucesso")
+                    ApiResponse.ok(dto, "Perfil atualizado com sucesso")
             );
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
+            // Pode ser cliente não encontrado ou validação de negócio
+            if (e.getMessage().contains("não encontrado")) {
+                return ResponseEntity
+                        .status(404)
+                        .body(ApiResponse.fail(e.getMessage()));
+            }
+            // Erros de validação (email duplicado, CPF duplicado)
             return ResponseEntity
-                    .status(404)
+                    .status(422)
                     .body(ApiResponse.fail(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(500)
+                    .body(ApiResponse.fail("Erro ao atualizar perfil: " + e.getMessage()));
         }
     }
 }

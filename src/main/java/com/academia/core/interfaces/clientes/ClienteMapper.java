@@ -13,7 +13,9 @@ public class ClienteMapper {
         return new ClienteResponseDto(
                 c.getId(),
                 c.getNome(),
+                c.getUsername(),
                 c.getEmail(),
+                c.getActive(),
                 c.getTelefone(),
                 c.getCpf(),
                 c.getEndereco(),

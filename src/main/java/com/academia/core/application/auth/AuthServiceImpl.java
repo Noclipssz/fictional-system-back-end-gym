@@ -1,7 +1,7 @@
 package com.academia.core.application.auth;
 
-import com.academia.core.domain.auth.User;
-import com.academia.core.domain.auth.UserRepositoryPort;
+import com.academia.core.domain.clientes.Cliente;
+import com.academia.core.infrastructure.persistence.ClienteJpaRepository;
 import com.academia.core.interfaces.auth.dto.AuthResponseDto;
 import com.academia.core.interfaces.auth.dto.LoginRequestDto;
 import com.academia.core.interfaces.auth.dto.RegisterRequestDto;
@@ -16,18 +16,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepositoryPort userRepository;
+    private final ClienteJpaRepository clienteRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthServiceImpl(
-            UserRepositoryPort userRepository,
+            ClienteJpaRepository clienteRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AuthenticationManager authenticationManager
     ) {
-        this.userRepository = userRepository;
+        this.clienteRepository = clienteRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -36,29 +36,30 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto register(RegisterRequestDto request) {
         // Verificar se username já existe
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (clienteRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username já está em uso");
         }
 
         // Verificar se email já existe
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (clienteRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email já está em uso");
         }
 
-        // Criar novo usuário
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setNome(request.getNome());
-        user.setActive(true);
+        // Criar novo cliente (que também é o usuário)
+        Cliente cliente = new Cliente();
+        cliente.setUsername(request.getUsername());
+        cliente.setEmail(request.getEmail());
+        cliente.setSenha(passwordEncoder.encode(request.getPassword()));
+        cliente.setNome(request.getNome());
+        cliente.setActive(true);
+        cliente.setPremium(false); // Cliente inicia como não premium
 
-        User savedUser = userRepository.save(user);
+        Cliente savedCliente = clienteRepository.save(cliente);
 
         // Gerar token JWT
         UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(savedUser.getUsername())
-                .password(savedUser.getPassword())
+                .withUsername(savedCliente.getUsername())
+                .password(savedCliente.getSenha())
                 .authorities("ROLE_USER")
                 .build();
 
@@ -66,10 +67,10 @@ public class AuthServiceImpl implements AuthService {
 
         return new AuthResponseDto(
                 token,
-                savedUser.getId(),
-                savedUser.getUsername(),
-                savedUser.getEmail(),
-                savedUser.getNome()
+                savedCliente.getId(),
+                savedCliente.getUsername(),
+                savedCliente.getEmail(),
+                savedCliente.getNome()
         );
     }
 
@@ -83,33 +84,33 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        // Buscar usuário
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        // Buscar cliente
+        Cliente cliente = clienteRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         // Gerar token
         UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities(user.getRoles().toArray(new String[0]))
+                .withUsername(cliente.getUsername())
+                .password(cliente.getSenha())
+                .authorities("ROLE_USER")
                 .build();
 
         String token = jwtService.generateToken(userDetails);
 
         return new AuthResponseDto(
                 token,
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getNome()
+                cliente.getId(),
+                cliente.getUsername(),
+                cliente.getEmail(),
+                cliente.getNome()
         );
     }
 
     @Override
-    public User getCurrentUser() {
+    public Cliente getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return clienteRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
     }
 }

@@ -1,0 +1,457 @@
+{
+	"info": {
+		"_postman_id": "academia-gym-api-2024",
+		"name": "Academia Gym - API Collection",
+		"description": "Collection completa da API do Sistema de Academia\n\n## Autenticação\nA maioria dos endpoints requer autenticação JWT. \n\n1. Primeiro, faça login em `/api/auth/login`\n2. Copie o token retornado\n3. Configure a variável `{{token}}` na collection ou use diretamente nos headers\n\n## Variáveis\n- `base_url`: http://localhost:8080\n- `token`: Seu JWT token",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Autenticação",
+			"item": [
+				{
+					"name": "Register - Cadastrar Usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"password\": \"senha123\",\n  \"username\": \"joaosilva\",\n  \"telefone\": \"11999999999\",\n  \"cpf\": \"12345678900\",\n  \"endereco\": \"Rua Teste, 123\",\n  \"dataNascimento\": \"1990-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registra um novo usuário no sistema e retorna um token JWT"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.success && response.data.token) {",
+									"    pm.collectionVariables.set('token', response.data.token);",
+									"    pm.collectionVariables.set('user_id', response.data.id);",
+									"    console.log('Token e User ID salvos automaticamente!');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"joaosilva\",\n  \"password\": \"senha123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Faz login e retorna token JWT. O token é salvo automaticamente na variável da collection."
+					},
+					"response": []
+				},
+				{
+					"name": "Me - Usuário Atual",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Retorna informações do usuário autenticado"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Perfil",
+			"item": [
+				{
+					"name": "Atualizar Meu Perfil",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"João Silva Santos\",\n  \"username\": \"joaosilva\",\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\",\n  \"telefone\": \"11977777777\",\n  \"cpf\": \"12345678900\",\n  \"endereco\": \"Rua Atualizada, 999\",\n  \"dataNascimento\": \"1990-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clientes/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clientes",
+								"{{user_id}}"
+							]
+						},
+						"description": "Atualiza o perfil do usuário autenticado. Use {{user_id}} obtido automaticamente do login ou de /api/auth/me. IMPORTANTE: Você só pode atualizar seu próprio perfil."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Treinos",
+			"item": [
+				{
+					"name": "Listar Todos os Treinos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/treinos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"treinos"
+							]
+						},
+						"description": "Lista todos os treinos cadastrados"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Treino por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/treinos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"treinos",
+								"1"
+							]
+						},
+						"description": "Busca um treino específico pelo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Treinos por Cliente",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/treinos/cliente/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"treinos",
+								"cliente",
+								"1"
+							]
+						},
+						"description": "Lista todos os treinos de um cliente específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Treino",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": 1,\n  \"titulo\": \"Treino de Peito\",\n  \"descricao\": \"Supino reto 4x12, Supino inclinado 4x10, Crossover 3x15, Flexões 3x até falhar\",\n  \"nivel\": \"INTERMEDIARIO\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/treinos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"treinos"
+							]
+						},
+						"description": "Cria um novo treino. Níveis disponíveis: INICIANTE, INTERMEDIARIO, AVANCADO"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pagamentos",
+			"item": [
+				{
+					"name": "Listar Todos os Pagamentos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						},
+						"description": "Lista todos os pagamentos registrados"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Pagamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"1"
+							]
+						},
+						"description": "Busca um pagamento específico pelo ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Pagamentos por Cliente",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos/cliente/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos",
+								"cliente",
+								"1"
+							]
+						},
+						"description": "Lista todos os pagamentos de um cliente específico"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Pagamento - PIX",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": 1,\n  \"valor\": 150.00,\n  \"metodo\": \"PIX\",\n  \"status\": \"APROVADO\",\n  \"referenciaExterna\": \"PIX123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						},
+						"description": "Registra um pagamento PIX. Métodos: PIX, CARTAO, BOLETO. Status: PENDENTE, APROVADO, FALHOU"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Pagamento - Cartão",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": 1,\n  \"valor\": 200.50,\n  \"metodo\": \"CARTAO\",\n  \"status\": \"PENDENTE\",\n  \"referenciaExterna\": \"CARD789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						},
+						"description": "Registra um pagamento via Cartão"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Pagamento - Boleto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clienteId\": 1,\n  \"valor\": 300.00,\n  \"metodo\": \"BOLETO\",\n  \"status\": \"PENDENTE\",\n  \"referenciaExterna\": \"BOL456789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pagamentos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pagamentos"
+							]
+						},
+						"description": "Registra um pagamento via Boleto"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

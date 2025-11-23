@@ -1,7 +1,7 @@
 package com.academia.core.application.auth;
 
-import com.academia.core.domain.auth.User;
-import com.academia.core.domain.auth.UserRepositoryPort;
+import com.academia.core.domain.clientes.Cliente;
+import com.academia.core.infrastructure.persistence.ClienteJpaRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,36 +10,35 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepositoryPort userRepository;
+    private final ClienteJpaRepository clienteRepository;
 
-    public CustomUserDetailsService(UserRepositoryPort userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(ClienteJpaRepository clienteRepository) {
+        this.clienteRepository = clienteRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        Cliente cliente = clienteRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Cliente não encontrado: " + username));
 
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.getActive(),
+                cliente.getUsername(),
+                cliente.getSenha(),
+                cliente.getActive(),
                 true,
                 true,
                 true,
-                getAuthorities(user)
+                getAuthorities()
         );
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
-        return user.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+    private Collection<? extends GrantedAuthority> getAuthorities() {
+        // Todos os clientes têm ROLE_USER por padrão
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 }

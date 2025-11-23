@@ -2,11 +2,12 @@ package com.academia.core.interfaces.auth;
 
 import com.academia.core.application.auth.AuthService;
 import com.academia.core.common.ApiResponse;
-import com.academia.core.domain.auth.User;
+import com.academia.core.domain.clientes.Cliente;
 import com.academia.core.interfaces.auth.dto.AuthResponseDto;
 import com.academia.core.interfaces.auth.dto.LoginRequestDto;
 import com.academia.core.interfaces.auth.dto.RegisterRequestDto;
-import com.academia.core.interfaces.auth.dto.UserResponseDto;
+import com.academia.core.interfaces.clientes.ClienteMapper;
+import com.academia.core.interfaces.clientes.dto.ClienteResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,17 +51,10 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDto>> getCurrentUser() {
+    public ResponseEntity<ApiResponse<ClienteResponseDto>> getCurrentUser() {
         try {
-            User user = authService.getCurrentUser();
-            UserResponseDto dto = new UserResponseDto(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getEmail(),
-                    user.getNome(),
-                    user.getActive(),
-                    user.getRoles()
-            );
+            Cliente cliente = authService.getCurrentUser();
+            ClienteResponseDto dto = ClienteMapper.toResponseDto(cliente);
             return ResponseEntity.ok(
                     ApiResponse.ok(dto, "Usuário autenticado")
             );

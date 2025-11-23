@@ -1,6 +1,7 @@
 package com.academia.core.domain.clientes;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,25 +20,44 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nome é obrigatório")
+    @Size(min = 3, max = 150, message = "Nome deve ter entre 3 e 150 caracteres")
     @Column(name = "nome", nullable = false, length = 150)
     private String nome;
 
+    @NotBlank(message = "Username é obrigatório")
+    @Size(min = 3, max = 100, message = "Username deve ter entre 3 e 100 caracteres")
+    @Column(name = "username", nullable = false, unique = true, length = 100)
+    private String username;
+
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Email inválido")
+    @Size(max = 150, message = "Email deve ter no máximo 150 caracteres")
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
     // NOVO CAMPO - Senha criptografada
+    @NotBlank(message = "Senha é obrigatória")
+    @Size(min = 6, max = 255, message = "Senha deve ter no mínimo 6 caracteres")
     @Column(name = "senha", nullable = false, length = 255)
     private String senha;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
+    @Size(max = 30, message = "Telefone deve ter no máximo 30 caracteres")
     @Column(name = "telefone", length = 30)
     private String telefone;
 
+    @Size(min = 11, max = 20, message = "CPF inválido")
     @Column(name = "cpf", length = 20)
     private String cpf;
 
+    @Size(max = 255, message = "Endereço deve ter no máximo 255 caracteres")
     @Column(name = "endereco", length = 255)
     private String endereco;
 
+    @Past(message = "Data de nascimento deve estar no passado")
     @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
@@ -76,12 +96,28 @@ public class Cliente {
         this.nome = nome;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public String getSenha() {

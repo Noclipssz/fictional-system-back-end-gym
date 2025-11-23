@@ -4,14 +4,14 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/academia?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: root
-    password: 123@Batata
+    url: jdbc:mysql://localhost:3307/academia?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: sail
+    password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update   # cria/atualiza as tabelas automaticamente
+      ddl-auto: create   # cria/atualiza as tabelas automaticamente
     show-sql: true
     properties:
       hibernate:
@@ -26,3 +26,6 @@ spring:
 jwt:
   secret: minha-chave-secreta-muito-segura-com-pelo-menos-256-bits-de-tamanho-para-jwt
   expiration: 86400000  # 24 horas em milissegundos
+
+
+

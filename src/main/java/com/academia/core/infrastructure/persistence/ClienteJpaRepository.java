@@ -11,8 +11,12 @@ import java.util.Optional;
 @Repository
 public interface ClienteJpaRepository extends JpaRepository<Cliente, Long>, ClienteRepositoryPort {
 
-    // Método para autenticação
+    // Métodos para autenticação
     Optional<Cliente> findByEmail(String email);
+    Optional<Cliente> findByUsername(String username);
+
+    // Método para validar CPF único
+    Optional<Cliente> findByCpf(String cpf);
 
     // Métodos herdados do ClienteRepositoryPort (já implementados pelo JpaRepository)
     @Override
