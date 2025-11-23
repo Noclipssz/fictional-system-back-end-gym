@@ -54,6 +54,20 @@ public class AuthServiceImpl implements AuthService {
         cliente.setActive(true);
         cliente.setPremium(false); // Cliente inicia como não premium
 
+        // Campos opcionais do cadastro
+        if (request.getTelefone() != null) {
+            cliente.setTelefone(request.getTelefone());
+        }
+        if (request.getCpf() != null) {
+            cliente.setCpf(request.getCpf());
+        }
+        if (request.getEndereco() != null) {
+            cliente.setEndereco(request.getEndereco());
+        }
+        if (request.getDataNascimento() != null) {
+            cliente.setDataNascimento(request.getDataNascimento());
+        }
+
         Cliente savedCliente = clienteRepository.save(cliente);
 
         // Gerar token JWT
