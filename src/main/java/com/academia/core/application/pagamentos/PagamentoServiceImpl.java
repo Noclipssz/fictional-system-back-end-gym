@@ -37,4 +37,14 @@ public class PagamentoServiceImpl implements PagamentoService {
     public List<Pagamento> listarPorCliente(Long clienteId) {
         return pagamentoRepository.findByClienteId(clienteId);
     }
+
+    @Override
+    public Optional<Pagamento> buscarPorReferenciaExterna(String referenciaExterna) {
+        return pagamentoRepository.findByReferenciaExterna(referenciaExterna);
+    }
+
+    @Override
+    public Pagamento atualizarPagamento(Pagamento pagamento) {
+        return pagamentoRepository.save(pagamento);
+    }
 }

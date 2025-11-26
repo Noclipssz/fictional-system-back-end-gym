@@ -2,6 +2,7 @@ package com.academia.core.application.clientes;
 
 import com.academia.core.domain.clientes.Cliente;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +15,8 @@ public interface ClienteService {
     Cliente criarCliente(Cliente cliente);
 
     Cliente atualizarCliente(Long id, Cliente clienteAtualizado);
+
+    Cliente atualizarStatusPremium(Long id, boolean premium, LocalDate premiumAte);
+
+    void atualizarSenha(Long id, String novaSenhaEncoded);
 }

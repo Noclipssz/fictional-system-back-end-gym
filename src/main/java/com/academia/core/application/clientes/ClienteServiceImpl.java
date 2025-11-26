@@ -1,11 +1,13 @@
 package com.academia.core.application.clientes;
 
+import com.academia.core.common.CpfValidator;
 import com.academia.core.domain.clientes.Cliente;
 import com.academia.core.infrastructure.persistence.ClienteJpaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,9 +63,16 @@ public class ClienteServiceImpl implements ClienteService {
             throw new IllegalArgumentException("Email já está em uso por outro cliente");
         }
 
-        // Validar CPF único (se fornecido)
+        // Validar CPF (se fornecido)
         if (cliente.getCpf() != null && !cliente.getCpf().trim().isEmpty()) {
-            Optional<Cliente> clienteComMesmoCpf = clienteRepository.findByCpf(cliente.getCpf());
+            String cpfSanitizado = CpfValidator.sanitize(cliente.getCpf());
+            if (!CpfValidator.isValid(cpfSanitizado)) {
+                throw new IllegalArgumentException("CPF inválido. Por favor, informe um CPF válido.");
+            }
+            cliente.setCpf(cpfSanitizado);
+
+            // Validar CPF único
+            Optional<Cliente> clienteComMesmoCpf = clienteRepository.findByCpf(cpfSanitizado);
             if (clienteComMesmoCpf.isPresent()) {
                 throw new IllegalArgumentException("CPF já está em uso por outro cliente");
             }
@@ -112,11 +121,20 @@ public class ClienteServiceImpl implements ClienteService {
                         }
                     }
 
-                    // Validar CPF único (se mudou e foi fornecido)
-                    if (clienteAtualizado.getCpf() != null && !clienteAtualizado.getCpf().equals(existente.getCpf())) {
-                        Optional<Cliente> clienteComMesmoCpf = clienteRepository.findByCpf(clienteAtualizado.getCpf());
-                        if (clienteComMesmoCpf.isPresent() && !clienteComMesmoCpf.get().getId().equals(id)) {
-                            throw new IllegalArgumentException("CPF já está em uso por outro cliente");
+                    // Validar e sanitizar CPF (se fornecido)
+                    String cpfParaSalvar = null;
+                    if (clienteAtualizado.getCpf() != null && !clienteAtualizado.getCpf().trim().isEmpty()) {
+                        cpfParaSalvar = CpfValidator.sanitize(clienteAtualizado.getCpf());
+                        if (!CpfValidator.isValid(cpfParaSalvar)) {
+                            throw new IllegalArgumentException("CPF inválido. Por favor, informe um CPF válido.");
+                        }
+
+                        // Validar CPF único (se mudou)
+                        if (!cpfParaSalvar.equals(existente.getCpf())) {
+                            Optional<Cliente> clienteComMesmoCpf = clienteRepository.findByCpf(cpfParaSalvar);
+                            if (clienteComMesmoCpf.isPresent() && !clienteComMesmoCpf.get().getId().equals(id)) {
+                                throw new IllegalArgumentException("CPF já está em uso por outro cliente");
+                            }
                         }
                     }
 
@@ -133,8 +151,8 @@ public class ClienteServiceImpl implements ClienteService {
                     if (clienteAtualizado.getTelefone() != null) {
                         existente.setTelefone(clienteAtualizado.getTelefone());
                     }
-                    if (clienteAtualizado.getCpf() != null) {
-                        existente.setCpf(clienteAtualizado.getCpf());
+                    if (cpfParaSalvar != null) {
+                        existente.setCpf(cpfParaSalvar);
                     }
                     if (clienteAtualizado.getEndereco() != null) {
                         existente.setEndereco(clienteAtualizado.getEndereco());
@@ -158,5 +176,26 @@ public class ClienteServiceImpl implements ClienteService {
                     return clienteRepository.save(existente);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado para atualizar"));
+    }
+
+    @Override
+    public Cliente atualizarStatusPremium(Long id, boolean premium, LocalDate premiumAte) {
+        return clienteRepository.findById(id)
+                .map(cliente -> {
+                    cliente.setPremium(premium);
+                    cliente.setPremiumAte(premium ? premiumAte : null);
+                    return clienteRepository.save(cliente);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado para atualizar premium"));
+    }
+
+    @Override
+    public void atualizarSenha(Long id, String novaSenhaEncoded) {
+        clienteRepository.findById(id)
+                .map(cliente -> {
+                    cliente.setSenha(novaSenhaEncoded);
+                    return clienteRepository.save(cliente);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado para atualizar senha"));
     }
 }

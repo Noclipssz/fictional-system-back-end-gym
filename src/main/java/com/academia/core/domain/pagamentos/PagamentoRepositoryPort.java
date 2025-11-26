@@ -8,4 +8,5 @@ public interface PagamentoRepositoryPort {
     List<Pagamento> findAll();
     Optional<Pagamento> findById(Long id);
     List<Pagamento> findByClienteId(Long clienteId);
+    Optional<Pagamento> findByReferenciaExterna(String referenciaExterna);
 }

@@ -27,5 +27,12 @@ jwt:
   secret: minha-chave-secreta-muito-segura-com-pelo-menos-256-bits-de-tamanho-para-jwt
   expiration: 86400000  # 24 horas em milissegundos
 
+abacatepay:
+  base-url: https://api.abacatepay.com/v1
+  api-key: abc_dev_RtwYxCr1ADruntuDYPqhpdrX
+  webhook-secret: ${ABACATEPAY_WEBHOOK_SECRET:}
+  return-url: ${ABACATEPAY_RETURN_URL:http://localhost:8001/views/premium/index.html}
+  completion-url: ${ABACATEPAY_COMPLETION_URL:http://localhost:8001/views/premium/sucesso.html}
+
 
 

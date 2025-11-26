@@ -14,4 +14,8 @@ public interface PagamentoService {
     Optional<Pagamento> buscarPorId(Long id);
 
     List<Pagamento> listarPorCliente(Long clienteId);
+
+    Optional<Pagamento> buscarPorReferenciaExterna(String referenciaExterna);
+
+    Pagamento atualizarPagamento(Pagamento pagamento);
 }
