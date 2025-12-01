@@ -27,7 +27,7 @@ public class PremiumService {
 
     private static final Logger log = LoggerFactory.getLogger(PremiumService.class);
 
-    private static final int PREMIUM_VALUE_IN_CENTS = 100;
+    private static final int PREMIUM_VALUE_IN_CENTS = 3990;
     private static final BigDecimal PREMIUM_VALUE = BigDecimal.valueOf(PREMIUM_VALUE_IN_CENTS, 2);
     private static final String PREMIUM_PRODUCT_EXTERNAL_ID = "premium-1m";
 
