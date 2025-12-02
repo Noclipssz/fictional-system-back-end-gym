@@ -19,4 +19,6 @@ public interface ClienteService {
     Cliente atualizarStatusPremium(Long id, boolean premium, LocalDate premiumAte);
 
     void atualizarSenha(Long id, String novaSenhaEncoded);
+
+    void excluirCliente(Long id);
 }

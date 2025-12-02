@@ -5,6 +5,7 @@ import com.academia.core.application.clientes.ClienteService;
 import com.academia.core.domain.clientes.Cliente;
 import com.academia.core.interfaces.clientes.dto.ClienteResponseDto;
 import com.academia.core.interfaces.clientes.dto.AlterarSenhaRequest;
+import com.academia.core.interfaces.clientes.dto.ExcluirContaRequest;
 import com.academia.core.common.ApiResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -152,6 +153,58 @@ public class ClienteController {
             return ResponseEntity
                     .status(500)
                     .body(ApiResponse.fail("Erro ao alterar senha: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Endpoint para excluir conta do cliente
+     * Requer confirmação de senha
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> excluirConta(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody ExcluirContaRequest request
+    ) {
+        try {
+            log.info("Tentativa de excluir conta: id={}", id);
+
+            // Validar que o usuário está excluindo apenas a própria conta
+            Cliente currentUser = authService.getCurrentUser();
+            log.info("Usuário autenticado: id={}, username={}",
+                    currentUser.getId(), currentUser.getUsername());
+
+            if (!currentUser.getId().equals(id)) {
+                log.warn("Tentativa de excluir conta de outro usuário. Current={}, Target={}",
+                        currentUser.getId(), id);
+                return ResponseEntity
+                        .status(403)
+                        .body(ApiResponse.fail("Você só pode excluir sua própria conta"));
+            }
+
+            // Verificar senha
+            if (!passwordEncoder.matches(request.getSenha(), currentUser.getSenha())) {
+                log.warn("Senha incorreta para exclusão de conta id={}", id);
+                return ResponseEntity
+                        .status(400)
+                        .body(ApiResponse.fail("Senha incorreta"));
+            }
+
+            // Excluir conta
+            clienteService.excluirCliente(id);
+
+            log.info("Conta excluída com sucesso para id={}", id);
+
+            return ResponseEntity.ok(ApiResponse.ok(null, "Conta excluída com sucesso"));
+        } catch (IllegalArgumentException e) {
+            log.error("Erro ao excluir conta: {}", e.getMessage());
+            return ResponseEntity
+                    .status(404)
+                    .body(ApiResponse.fail(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Erro ao excluir conta: {}", e.getMessage());
+            return ResponseEntity
+                    .status(500)
+                    .body(ApiResponse.fail("Erro ao excluir conta: " + e.getMessage()));
         }
     }
 }

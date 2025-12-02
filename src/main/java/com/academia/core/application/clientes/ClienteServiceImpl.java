@@ -129,8 +129,11 @@ public class ClienteServiceImpl implements ClienteService {
                             throw new IllegalArgumentException("CPF inválido. Por favor, informe um CPF válido.");
                         }
 
-                        // Validar CPF único (se mudou)
-                        if (!cpfParaSalvar.equals(existente.getCpf())) {
+                        // Validar CPF único (se mudou) - sanitizar ambos para comparação correta
+                        String cpfExistenteSanitizado = existente.getCpf() != null
+                            ? CpfValidator.sanitize(existente.getCpf())
+                            : null;
+                        if (!cpfParaSalvar.equals(cpfExistenteSanitizado)) {
                             Optional<Cliente> clienteComMesmoCpf = clienteRepository.findByCpf(cpfParaSalvar);
                             if (clienteComMesmoCpf.isPresent() && !clienteComMesmoCpf.get().getId().equals(id)) {
                                 throw new IllegalArgumentException("CPF já está em uso por outro cliente");
@@ -197,5 +200,13 @@ public class ClienteServiceImpl implements ClienteService {
                     return clienteRepository.save(cliente);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado para atualizar senha"));
+    }
+
+    @Override
+    public void excluirCliente(Long id) {
+        if (!clienteRepository.existsById(id)) {
+            throw new IllegalArgumentException("Cliente não encontrado para exclusão");
+        }
+        clienteRepository.deleteById(id);
     }
 }

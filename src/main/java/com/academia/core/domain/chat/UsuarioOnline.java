@@ -35,7 +35,13 @@ public class UsuarioOnline {
 
     public UsuarioOnline(Cliente cliente, String sessionId) {
         this.clienteId = cliente.getId();
-        this.cliente = cliente;
+        // Não setamos o cliente diretamente para evitar problemas com Hibernate
+        // O cliente será carregado via lazy loading se necessário
+        this.sessionId = sessionId;
+    }
+
+    public UsuarioOnline(Long clienteId, String sessionId) {
+        this.clienteId = clienteId;
         this.sessionId = sessionId;
     }
 }

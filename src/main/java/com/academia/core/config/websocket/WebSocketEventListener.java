@@ -107,7 +107,7 @@ public class WebSocketEventListener {
                     usuarioOnlineRepository.delete(existing);
                 });
 
-                UsuarioOnline usuarioOnline = new UsuarioOnline(cliente, sessionId);
+                UsuarioOnline usuarioOnline = new UsuarioOnline(cliente.getId(), sessionId);
                 usuarioOnlineRepository.save(usuarioOnline);
 
                 log.info("Usuário registrado como online: {} (ID: {}, Session: {})", finalUsername, cliente.getId(), sessionId);
@@ -138,24 +138,33 @@ public class WebSocketEventListener {
 
         // Buscar usuário pela sessão
         usuarioOnlineRepository.findBySessionId(sessionId).ifPresent(usuarioOnline -> {
-            Cliente cliente = usuarioOnline.getCliente();
-            Long clienteId = cliente.getId();
-            String username = cliente.getUsername();
-            String nome = cliente.getNome();
+            Long clienteId = usuarioOnline.getClienteId();
 
-            // Remover da tabela de online
-            usuarioOnlineRepository.delete(usuarioOnline);
+            // Buscar cliente pelo ID para obter nome e username
+            clienteRepository.findById(clienteId).ifPresent(cliente -> {
+                String username = cliente.getUsername();
+                String nome = cliente.getNome();
 
-            log.info("Usuário desconectado: {} (ID: {}, Session: {})", username, clienteId, sessionId);
+                // Remover da tabela de online
+                usuarioOnlineRepository.delete(usuarioOnline);
 
-            // Notificar todos sobre o usuário que saiu
-            PresencaEventDto presencaEvent = new PresencaEventDto(
-                    clienteId,
-                    username,
-                    nome,
-                    false
-            );
-            messagingTemplate.convertAndSend("/topic/presenca", presencaEvent);
+                log.info("Usuário desconectado: {} (ID: {}, Session: {})", username, clienteId, sessionId);
+
+                // Notificar todos sobre o usuário que saiu
+                PresencaEventDto presencaEvent = new PresencaEventDto(
+                        clienteId,
+                        username,
+                        nome,
+                        false
+                );
+                messagingTemplate.convertAndSend("/topic/presenca", presencaEvent);
+            });
+
+            // Se não encontrou o cliente, ainda assim remove da tabela de online
+            if (clienteRepository.findById(clienteId).isEmpty()) {
+                usuarioOnlineRepository.delete(usuarioOnline);
+                log.info("Sessão removida para cliente inexistente: {} (Session: {})", clienteId, sessionId);
+            }
         });
     }
 }

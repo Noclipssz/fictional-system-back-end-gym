@@ -181,6 +181,7 @@ public class ChatService {
     /**
      * Notifica que um usuário está digitando
      */
+    @Transactional(readOnly = true)
     public void notificarDigitando(String username, Long conversaId, boolean digitando) {
         Cliente cliente = clienteRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
