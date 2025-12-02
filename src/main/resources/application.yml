@@ -30,8 +30,8 @@ abacatepay:
   base-url: ${ABACATEPAY_BASE_URL:https://api.abacatepay.com/v1}
   api-key: ${ABACATEPAY_API_KEY:abc_dev_RtwYxCr1ADruntuDYPqhpdrX}
   webhook-secret: ${ABACATEPAY_WEBHOOK_SECRET:}
-  return-url: ${ABACATEPAY_RETURN_URL:https://fitpanelgym-7l6996h43-kairodevs-projects.vercel.app/views/premium/index.html}
-  completion-url: ${ABACATEPAY_COMPLETION_URL:https://fitpanelgym-7l6996h43-kairodevs-projects.vercel.app/views/premium/sucesso.html}
+  return-url: ${ABACATEPAY_RETURN_URL:https://fitpanelgym.vercel.app/views/premium/index.html}
+  completion-url: ${ABACATEPAY_COMPLETION_URL:https://fitpanelgym.vercel.app/views/premium/sucesso.html}
 
 
 
